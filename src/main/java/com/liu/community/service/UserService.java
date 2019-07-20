@@ -1,6 +1,8 @@
 package com.liu.community.service;
 
+import com.liu.community.dao.LoginTicketMapper;
 import com.liu.community.dao.UserMapper;
+import com.liu.community.entity.LoginTicket;
 import com.liu.community.entity.User;
 import com.liu.community.util.CommunityConstant;
 import com.liu.community.util.CommunityUtil;
@@ -8,6 +10,7 @@ import com.liu.community.util.MailClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.objenesis.ObjenesisHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -29,6 +32,9 @@ public class UserService implements CommunityConstant {
     @Autowired
     private TemplateEngine templateEngine;
 
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
+
     @Value("${community.path.domain}")
     private String domain;
 
@@ -39,6 +45,8 @@ public class UserService implements CommunityConstant {
         return userMapper.selectById(id);
     }
 
+
+    //==========注册的业务逻辑处理=============================
     public Map<String, Object> register(User user) {
         Map<String, Object> map = new HashMap<>();
 
@@ -95,6 +103,8 @@ public class UserService implements CommunityConstant {
         return map;
     }
 
+
+    //==========激活的业务逻辑处理=============================
     public int activation(int userId, String code) {
         User user = userMapper.selectById(userId);
         if (user.getStatus() == 1) {
@@ -106,5 +116,87 @@ public class UserService implements CommunityConstant {
             return ACTIVATION_FAILURE;
         }
     }
+
+    //==========登录的业务逻辑处理=============================
+    public Map<String,Object> login(String username, String password, int expiredSeconds){
+        Map<String, Object> map = new HashMap<>();
+        //空值处理
+        if(StringUtils.isBlank(username)){
+            map.put("usernameMsg","账号不能为空！");
+            return map;
+        }
+        if(StringUtils.isBlank(password)){
+            map.put("passwordMsg","密码不能为空！");
+            return map;
+        }
+        // 验证账号
+        User user = userMapper.selectByName(username);
+        if (user == null) {
+            map.put("usernameMsg", "该账号不存在!");
+            return map;
+        }
+
+        // 验证状态
+        if (user.getStatus() == 0) {
+            map.put("usernameMsg", "该账号未激活!");
+            return map;
+        }
+
+        // 验证密码
+        password = CommunityUtil.md5(password + user.getSalt());
+        if (!user.getPassword().equals(password)) {
+            map.put("passwordMsg", "密码不正确!");
+            return map;
+        }
+
+        // 生成登录凭证
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(user.getId());//user表中的id
+        loginTicket.setTicket(CommunityUtil.generateUUID());//凭证是一个随机生成的字符串
+        loginTicket.setStatus(0);//status：0表示有效；1表示无效
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSeconds * 1000));
+        loginTicketMapper.insertLoginTicket(loginTicket);
+
+        map.put("ticket", loginTicket.getTicket());
+        return map;
+    }
+
+    public void logout(String ticket) {
+        loginTicketMapper.updateStatus(ticket, 1);//1表示无效
+    }
+
+    //=============================忘记密码设置新的密码=============================
+
+    // 重置密码
+    public Map<String, Object> resetPassword(String email, String password) {
+        Map<String, Object> map = new HashMap<>();
+
+        // 空值处理
+        if (StringUtils.isBlank(email)) {
+            map.put("emailMsg", "邮箱不能为空!");
+            return map;
+        }
+        if (StringUtils.isBlank(password)) {
+            map.put("passwordMsg", "密码不能为空!");
+            return map;
+        }
+
+        // 验证邮箱
+        User user = userMapper.selectByEmail(email);
+        if (user == null) {
+            map.put("emailMsg", "该邮箱尚未注册!");
+            return map;
+        }
+
+        // 重置密码
+        password = CommunityUtil.md5(password + user.getSalt());
+        userMapper.updatePassword(user.getId(), password);
+
+        map.put("user", user);
+        return map;
+    }
+
+
+
 
 }
