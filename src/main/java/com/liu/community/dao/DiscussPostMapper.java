@@ -27,4 +27,8 @@ public interface DiscussPostMapper {
     int selectDiscussPostRows(@Param("userId") int userId);
     //discuss_post表中的行数，参数为0时查询这个表的行数；参数为userId时查这个表中userId的的个数
 
+    int insertDiscussPost(DiscussPost discussPost);
+
+    DiscussPost selectDiscussPostById(int id);
+
 }

@@ -181,7 +181,6 @@ public class LoginController implements CommunityConstant {
 
         return CommunityUtil.getJSONString(0);
     }
-
     // 重置密码
     @RequestMapping(path = "/forget/password", method = RequestMethod.POST)
     public String resetPassword(String email, String verifyCode, String password, Model model, HttpSession session) {
