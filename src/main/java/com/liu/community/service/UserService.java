@@ -45,6 +45,10 @@ public class UserService implements CommunityConstant {
         return userMapper.selectById(id);
     }
 
+    public User findUserByName(String name){
+        return userMapper.selectByName(name);
+    }
+
 
     //==========注册的业务逻辑处理=============================
     public Map<String, Object> register(User user) {
