@@ -221,6 +221,21 @@ public class Hello {
         return "get session";
     }
 
+    // ajax示例
+    //访问静态页面：http://localhost:8080/community/html/ajax-demo.html
+    @RequestMapping(path = "/ajax", method = RequestMethod.POST)
+    @ResponseBody
+    public String testAjax(String name, int age) {
+        System.out.println(name);
+        System.out.println(age);
+        return CommunityUtil.getJSONString(0, "操作成功!");
+        //会传入到ajax-demo文件的function(data)，data就指返回的对象数据（String对象）
+
+        //可以在控制台点击“发送”，
+        // 在网页console项中会显示string {“msg”:"操作成功！"， “code”，0} object 0 操作成功
+    }
+
+
 
 
 
