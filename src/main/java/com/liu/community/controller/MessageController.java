@@ -9,6 +9,7 @@ import com.liu.community.util.CommunityConstant;
 import com.liu.community.util.CommunityUtil;
 import com.liu.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.naming.IdentityNamingStrategy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ public class MessageController {
     // 私信列表
     @RequestMapping(path = "/letter/list", method = RequestMethod.GET)
     public String getLetterList(Model model, Page page) {
+//        Integer.valueOf("abc");//故意写一个错误，用来测试异常处理
         User user = hostHolder.getUser();
         // 分页信息
         page.setLimit(5);
@@ -127,6 +129,8 @@ public class MessageController {
     @RequestMapping(path = "/letter/send",method = RequestMethod.POST)
     @ResponseBody
     public String sendLetter(String toName, String content){
+//        Integer.valueOf("abc");//故意写一个错误，用来测试异常处理
+
         //toName接收用户名，content内容
         User target = userService.findUserByName(toName);
         if(target == null){

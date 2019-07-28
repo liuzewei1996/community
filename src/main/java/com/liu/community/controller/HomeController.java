@@ -73,4 +73,9 @@ public class HomeController {
 //        Html文件中：Map.user.headerUrl---->map.get(“user”)  user  user.getHeaderUrl()
     }
 
+    @RequestMapping(path = "/error", method = RequestMethod.GET)
+    public String getErrorPage() {
+        return "/error/500";
+    }
+
 }
