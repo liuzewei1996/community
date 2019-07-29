@@ -38,18 +38,18 @@ public class AlphaService {
     //注：创建类对象时：创建新的对象，开辟内存空间--压入栈顶--先调用执行构造方法--
     // 针对在堆上所生成的对象的引用，将此引用值返回，即将引用存储在局部变量表中；
     //可以得到顺序为：：======》实例化(构造方法)--初始化--生成的对象--销毁AlphaService
-    public AlphaService() {//构造方法
-        System.out.println("实例化AlphaService");
-    }
+//    public AlphaService() {//构造方法
+//        System.out.println("实例化AlphaService");
+//    }
 
-    @PostConstruct//声明为在构造方法之后执行
-    public void init(){
-        System.out.println("初始化AlphaService");
-    }
-    @PreDestroy//声明为在对象销毁之前执行
-    public void destroy(){
-        System.out.println("销毁AlphaService");
-    }
+//    @PostConstruct//声明为在构造方法之后执行
+//    public void init(){
+//        System.out.println("初始化AlphaService");
+//    }
+//    @PreDestroy//声明为在对象销毁之前执行
+//    public void destroy(){
+//        System.out.println("销毁AlphaService");
+//    }
 
     @Autowired
     public AlphaDao alphaDao;
