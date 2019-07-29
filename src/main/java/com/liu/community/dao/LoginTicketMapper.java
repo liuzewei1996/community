@@ -13,8 +13,10 @@ import org.apache.ibatis.annotations.*;
  * @Version: 1.0
  */
 @Mapper
+@Deprecated
 public interface LoginTicketMapper {
-
+//不推荐使用了：使用Redis对登录进行了重构：验证码，登录凭证ticket，
+// 过期时间等都存储到Redis中，不需要MySQL中的login_ticket表了；
     @Insert({
     "insert into login_ticket(user_id,ticket,status,expired) ",
             "values(#{userId},#{ticket},#{status},#{expired})"

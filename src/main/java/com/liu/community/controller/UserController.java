@@ -1,10 +1,11 @@
 package com.liu.community.controller;
 
 import com.liu.community.annotation.LoginRequired;
+import com.liu.community.entity.Comment;
+import com.liu.community.entity.DiscussPost;
+import com.liu.community.entity.Page;
 import com.liu.community.entity.User;
-import com.liu.community.service.FollowService;
-import com.liu.community.service.LikeService;
-import com.liu.community.service.UserService;
+import com.liu.community.service.*;
 import com.liu.community.util.CommunityConstant;
 import com.liu.community.util.CommunityUtil;
 import com.liu.community.util.HostHolder;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.*;
 
 @Controller
 @RequestMapping("/user")
@@ -52,6 +54,12 @@ public class UserController implements CommunityConstant {
 
     @Autowired
     private FollowService followService;
+
+    @Autowired
+    private DiscussPostService discussPostService;
+
+    @Autowired
+    private CommentService commentService;
 
     @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
@@ -122,10 +130,10 @@ public class UserController implements CommunityConstant {
 
     //个人主页：
     //<a class="dropdown-item text-center" th:href="@{/user/profile/${loginUser.id}}">个人主页</a>
-    @RequestMapping(path= "/profile/{userId}",method = RequestMethod.GET)
-    public String getProfilePage(@PathVariable("userId") int userId, Model model){
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
         User user = userService.findUserById(userId);
-        if(user == null){
+        if (user == null) {
             throw new RuntimeException("该用户不存在");
         }
         //用户(MySQL中)
@@ -144,7 +152,7 @@ public class UserController implements CommunityConstant {
 
         //是否已关注
         boolean hasFollowed = false;
-        if(hostHolder.getUser() != null){
+        if (hostHolder.getUser() != null) {
             hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
         }
         model.addAttribute("hasFollowed", hasFollowed);
@@ -153,7 +161,66 @@ public class UserController implements CommunityConstant {
         return "/site/profile";
     }
 
+    //个人主页,显示个人已发帖子的页面：
+    @RequestMapping(path = "/mypost/{userId}", method = RequestMethod.GET)
+    public String getPostPage(@PathVariable("userId") int userId, Page page, Model model) {
 
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在！");
+        }
+        model.addAttribute("user", user);
+
+        page.setLimit(5);//不设置的话默认为10
+        page.setPath("/user/mypost/" + userId);
+        page.setRows(discussPostService.findDiscussPostRows(userId));
+
+        // 帖子列表
+        List<DiscussPost> discussList = discussPostService
+                .findDiscussPosts(userId, page.getOffset(), page.getLimit());
+        List<Map<String, Object>> discussVOList = new ArrayList<>();
+        if (discussList != null) {
+            for (DiscussPost post : discussList) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("discussPost", post);
+                map.put("likeCount", likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId()));
+                discussVOList.add(map);
+            }
+        }
+        model.addAttribute("discussPosts", discussVOList);
+
+        return "site/my-post";
+    }
+
+
+    //个人主页,显示用户的回复的页面：
+    @RequestMapping(path = "/myreply/{userId}", method = RequestMethod.GET)
+    public String getReplyPage(@PathVariable("userId") int userId, Page page, Model model) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在！");
+        }
+        model.addAttribute("user", user);
+
+        page.setPath("/user/myreply/" + userId);
+        page.setRows(commentService.findUserCount(userId));
+
+        // 回复列表
+        List<Comment> commentList = commentService.findUserComments(userId, page.getOffset(), page.getLimit());
+        List<Map<String, Object>> commentVOList = new ArrayList<>();
+        if (commentList != null) {
+            for (Comment comment : commentList) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("comment", comment);
+                DiscussPost post = discussPostService.findDiscussPostById(comment.getEntityId());
+                map.put("discussPost", post);
+                commentVOList.add(map);
+            }
+        }
+        model.addAttribute("comments", commentVOList);
+
+        return "site/my-reply";
+    }
 
 
 }

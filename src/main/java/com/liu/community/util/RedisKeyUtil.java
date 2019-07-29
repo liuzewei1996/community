@@ -7,6 +7,9 @@ public class RedisKeyUtil {
     private static final String PREFIX_USER_LIKE = "like:user";
     private static final String PREFIX_FOLLOWEE = "followee";
     private static final String PREFIX_FOLLOWER = "follower";
+    private static final String PREFIX_KAPTCHA = "kaptcha";
+    private static final String PREFIX_TICKET = "ticket";
+    private static final String PREFIX_USER = "user";
 
     //定义一个静态方法
     // 某个实体的赞
@@ -31,6 +34,22 @@ public class RedisKeyUtil {
     // follower:entityType:entityId -> zset(userId,now)
     public static String getFollowerKey(int entityType, int entityId) {
         return PREFIX_FOLLOWER + SPLIT + entityType + SPLIT + entityId;
+    }
+
+    // 登录验证码：  kaptcha：owner  其中ower为用户的一个临时凭证
+    //每一个key都不同，对应的value为验证码
+    public static String getKaptchaKey(String owner) {
+        return PREFIX_KAPTCHA + SPLIT + owner;
+    }
+
+    // 登录的凭证:   kaptcha：ticket
+    public static String getTicketKey(String ticket) {
+        return PREFIX_TICKET + SPLIT + ticket;
+    }
+
+    // 用户  kaptcha：userId
+    public static String getUserKey(int userId) {
+        return PREFIX_USER + SPLIT + userId;
     }
 
 

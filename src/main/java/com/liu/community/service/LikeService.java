@@ -24,7 +24,8 @@ public class LikeService {
 //            redisTemplate.opsForSet().add(entityLikeKey, userId);
 //        }
 //    }
-    // 点赞代码重构：在用户个人主页，添加用户的收到的赞的总数
+
+    // =========点赞代码重构：在用户个人主页，添加用户的收到的赞的总数=====================
     public void like(int userId, int entityType, int entityId, int entityUserId) {
         //需要实现事务
         //查询一定要放在事务的过程之外；Redis的事务比较特殊，如果将查询放在事务内，
