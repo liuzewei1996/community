@@ -47,4 +47,22 @@ public class MessageService {
         return messageMapper.updateStatus(ids, 1);//0为未读，1为已读，2为无权限
     }
 
+    //=+++++++++++++++++++++++系统通知的业务逻辑代码+++++++++++++++++++++++++++
+    // （点赞、评论与关注的系统通知是通过kafka实现，但数据读写等操作仍然是在MySQL数据库中）：====
+    public Message findLatestNotice(int userId, String topic) {
+        return messageMapper.selectLatestNotice(userId, topic);
+    }
+
+    public int findNoticeCount(int userId, String topic) {
+        return messageMapper.selectNoticeCount(userId, topic);
+    }
+
+    public int findNoticeUnreadCount(int userId, String topic) {
+        return messageMapper.selectNoticeUnreadCount(userId, topic);
+    }
+
+    public List<Message> findNotices(int userId, String topic, int offset, int limit) {
+        return messageMapper.selectNotices(userId, topic, offset, limit);
+    }
+
 }

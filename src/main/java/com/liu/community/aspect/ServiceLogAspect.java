@@ -29,6 +29,10 @@ public class ServiceLogAspect {
     public void before(JoinPoint joinPoint) {
         // 用户[1.2.3.4],在[xxx],访问了[com.liu.community.service.xxx()].
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if(attributes == null){
+            //====如果不是常规的页面Collector对service的调用，则attributes为空；如kafka中EventConsumer调用了service
+            return;
+        }
         HttpServletRequest request = attributes.getRequest();//得到HttpServletRequest
         String ip = request.getLocalAddr();//ip
         String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());//时间

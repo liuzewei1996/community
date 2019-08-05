@@ -5,10 +5,10 @@ import java.util.Date;
 public class Message {
 
     private int id;
-    private int fromId;
-    private int toId;
-    private String conversationId;
-    private String content;
+    private int fromId;//消息发布者id
+    private int toId;//消息接收者id
+    private String conversationId;//会话id，两个id拼在一起的；按照大小来拼的；小的在前面
+    private String content;//消息内容
     private int status;
     private Date createTime;
 

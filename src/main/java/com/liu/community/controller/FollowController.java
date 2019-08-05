@@ -1,8 +1,10 @@
 package com.liu.community.controller;
 
 
+import com.liu.community.entity.Event;
 import com.liu.community.entity.Page;
 import com.liu.community.entity.User;
+import com.liu.community.event.EventProducer;
 import com.liu.community.service.FollowService;
 import com.liu.community.service.UserService;
 import com.liu.community.util.CommunityConstant;
@@ -31,6 +33,9 @@ public class FollowController implements CommunityConstant {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     //关注，传入参数：实体类型，实体id
     //异步的操作，局部更新
     @RequestMapping(path = "/follow", method = RequestMethod.POST)
@@ -39,6 +44,15 @@ public class FollowController implements CommunityConstant {
         User user = hostHolder.getUser();
 
         followService.follow(user.getId(), entityType, entityId);
+
+        //添加kafka系统通知部分：触发点赞事件
+        Event event = new Event().setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityId(entityId)
+                .setEntityType(entityType)
+                .setEntityUserId(entityId);//只能关注人，所以实体UserId就是entityId
+
+        eventProducer.fireEvent(event);
 
         return CommunityUtil.getJSONString(0, "已关注!");
     }
