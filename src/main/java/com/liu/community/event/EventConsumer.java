@@ -1,8 +1,11 @@
 package com.liu.community.event;
 
 import com.alibaba.fastjson.JSONObject;
+import com.liu.community.entity.DiscussPost;
 import com.liu.community.entity.Event;
 import com.liu.community.entity.Message;
+import com.liu.community.service.DiscussPostService;
+import com.liu.community.service.ElasticsearchService;
 import com.liu.community.service.MessageService;
 import com.liu.community.util.CommunityConstant;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -32,12 +35,18 @@ public class EventConsumer implements CommunityConstant {
 
     @Autowired
     private MessageService messageService;
-    //
+
+    @Autowired
+    private DiscussPostService discussPostService;
+
+    @Autowired
+    private ElasticsearchService elasticsearchService;
+
+
     //系统通知功能：提示：关注； 评论；点赞；
 
     //可以一个方法消费一个主题，也可以一个方法消费多个主题；
     //一个主题也可以被多个方法消费
-
     @KafkaListener(topics = {TOPIC_COMMENT, TOPIC_FOLLOW,TOPIC_LIKE})
     public void handleCommentMessage(ConsumerRecord record){
         if(record == null || record.value() == null){
@@ -74,5 +83,27 @@ public class EventConsumer implements CommunityConstant {
         //具体内容由以上信息拼出：在页面显示的是 ： 用户**评论了你的帖子 ，点击查看；
 
         messageService.addMessage(message);
+    }
+
+
+    //=======================消费传来的触发消息：根据消息向elasticsearch服务器增加数据==============================
+    // 消费发帖事件
+    @KafkaListener(topics = {TOPIC_PUBLISH})
+    public void handlePublishMessage(ConsumerRecord record) {
+        if (record == null || record.value() == null) {
+            logger.error("消息的内容为空!");
+            return;
+        }
+
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if (event == null) {
+            logger.error("消息格式错误!");
+            return;
+        }
+
+        //得到的消息没有问题，就开始处理事件
+        //先查找到帖子，再将帖子保存到elasticsearch服务器
+        DiscussPost post = discussPostService.findDiscussPostById(event.getEntityId());
+        elasticsearchService.saveDiscussPost(post);
     }
 }

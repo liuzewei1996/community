@@ -1,9 +1,7 @@
 package com.liu.community.controller;
 
-import com.liu.community.entity.Comment;
-import com.liu.community.entity.DiscussPost;
-import com.liu.community.entity.Page;
-import com.liu.community.entity.User;
+import com.liu.community.entity.*;
+import com.liu.community.event.EventProducer;
 import com.liu.community.service.CommentService;
 import com.liu.community.service.DiscussPostService;
 import com.liu.community.service.LikeService;
@@ -40,6 +38,9 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
 
     //添加帖子
     @RequestMapping(path = "/add", method = RequestMethod.POST)
@@ -59,6 +60,14 @@ public class DiscussPostController implements CommunityConstant {
         post.setContent(content);
         post.setCreateTime(new Date());
         discussPostService.addDiscussPost(post);
+
+        //==========Elasticsearch新增发布帖子事件：发布帖子时，将帖子异步的提交到Elasticsearch服务器===========
+        Event event = new Event().setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(post.getId());
+        eventProducer.fireEvent(event);//触发事件//还有在评论层加上：增加评论后更新情况
+
 
         // 报错的情况,将来统一处理.
         return CommunityUtil.getJSONString(0, "发布成功!");

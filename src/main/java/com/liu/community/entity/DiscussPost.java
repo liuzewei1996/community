@@ -1,5 +1,10 @@
 package com.liu.community.entity;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
 import java.util.Date;
 
 /**
@@ -11,15 +16,36 @@ import java.util.Date;
  * @Date: 2019/7/17 16:55
  * @Version: 1.0
  */
+@Document(indexName = "discusspost",type = "_doc",shards = 5,replicas = 3)
+//===============添加es的映射配置注解;名称、类型、分片数、副本
 public class DiscussPost {
+    @Id//====
     private int id;
+
+    @Field(type = FieldType.Integer)//====
     private int userId;
+
+    //======主要需要查找的内容
+    @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
+    //=====analyzer存储时候的解析器(分词器),应该分为尽可能多的词，使搜索范围大。
+    //======= searchAnalyzer搜索时候的解析器，拆分粗一点就可以
     private String title;
+    @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String content;
+
+    @Field(type = FieldType.Integer)//====
     private int type;
+
+    @Field(type = FieldType.Integer)//====
     private int status;
+
+    @Field(type = FieldType.Date)//====
     private Date createTime;
+
+    @Field(type = FieldType.Integer)//====
     private int commentCount;
+
+    @Field(type = FieldType.Double)//====
     private double score;
 
     public int getId() {
