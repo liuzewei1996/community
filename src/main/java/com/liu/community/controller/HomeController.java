@@ -7,7 +7,6 @@ import com.liu.community.service.DiscussPostService;
 import com.liu.community.service.LikeService;
 import com.liu.community.service.UserService;
 import com.liu.community.util.CommunityConstant;
-import com.liu.community.util.CommunityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -86,6 +85,12 @@ public class HomeController implements CommunityConstant {
     @RequestMapping(path = "/error", method = RequestMethod.GET)
     public String getErrorPage() {
         return "/error/500";
+    }
+
+    // 拒绝访问时的提示页面
+    @RequestMapping(path = "/denied", method = RequestMethod.GET)
+    public String getDeniedPage() {
+        return "/error/404";
     }
 
 }

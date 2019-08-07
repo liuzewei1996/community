@@ -6,6 +6,10 @@ import com.liu.community.service.UserService;
 import com.liu.community.util.CookieUtil;
 import com.liu.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -41,6 +45,13 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
                 //每个浏览器访问服务器，服务器会产生一个独立的线程来处理请求；服务器是在多线程的环境；
                 // 所以存放用户如果仅仅是在一个类定义的变量中，会出现问题
                 hostHolder.setUser(user);//存放到了线程对应的对象中去了
+
+                //################################################################################
+                // 新增：构建用户认证的结果,并存入SecurityContext,以便于Security进行授权.
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        user, user.getPassword(), userService.getAuthorities(user.getId()));
+                SecurityContextHolder.setContext(new SecurityContextImpl(authentication));
+
             }
         }
 
@@ -59,5 +70,9 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         hostHolder.clear();//模板引擎都执行完之后，整个请求结束，清掉hostHolder
+
+        //################################################################################
+        SecurityContextHolder.clearContext();
+
     }
 }

@@ -63,6 +63,14 @@ public class DiscussPostService {
         return discussPostMapper.updateCommentCount(id, commentCount);
     }
 
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%增加置顶、加精、删除的方法
+    public int updateType(int id, int type){
+        return discussPostMapper.updateType(id, type);
+    }
+    public int updateStatus(int id, int type){
+        return discussPostMapper.updateStatus(id, type);
+    }
+
 
 
 }

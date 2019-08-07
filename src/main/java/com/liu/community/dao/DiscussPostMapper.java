@@ -33,4 +33,9 @@ public interface DiscussPostMapper {
 
     int updateCommentCount(int id, int commentCount);
 
+    //%%%%%%%%%%%%%%%%%%%%%%%%%%%%增加置顶、加精、删除的方法
+    int updateType(int id, int type);
+
+    int updateStatus(int id, int status);
+
 }
