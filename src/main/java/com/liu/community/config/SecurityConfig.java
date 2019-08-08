@@ -61,7 +61,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Comm
                         AUTHORITY_MODERATOR
                 )
                 .antMatchers(
-                        "/discuss/delete"
+                        "/discuss/delete",
+                        "/data/**" //***新增data的权限管理
                 )
                 .hasAnyAuthority(//删除的权限
                         AUTHORITY_ADMIN
